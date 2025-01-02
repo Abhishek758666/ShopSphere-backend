@@ -3,6 +3,7 @@ import User from "./models/userModel";
 import Product from "./models/productModel";
 import Category from "./models/categoryModel";
 import { envConfig } from "../config/envConfig";
+import Cart from "./models/cartModel";
 
 const sequelize = new Sequelize({
   database: envConfig.DB_NAME,
@@ -34,5 +35,8 @@ Product.belongsTo(User, { foreignKey: "userId" });
 
 Category.hasOne(Product, { foreignKey: "categoryId" });
 Product.belongsTo(Category, { foreignKey: "categoryId" });
+
+Product.hasMany(Cart, { foreignKey: "productId" });
+Cart.belongsTo(User, { foreignKey: "userId" });
 
 export default sequelize;

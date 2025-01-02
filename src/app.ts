@@ -5,6 +5,7 @@ import adminSeeder from "./services/adminSeeder";
 import productRoute from "./routes/productRoute";
 import categoryController from "./controllers/categoryController";
 import categoryRoute from "./routes/categoryRoute";
+import cartRouter from "./routes/cartRoute";
 
 const app = express();
 app.use(express.json());
@@ -15,6 +16,7 @@ categoryController.CategorySeeder();
 app.use("/api/v1/", userRoute);
 app.use("/api/v1/products", productRoute);
 app.use("/api/v1/categories", categoryRoute);
+app.use("/api/v1/cart", cartRouter);
 
 app.get("/", (req, res) => {
   res.send("i am alive");
