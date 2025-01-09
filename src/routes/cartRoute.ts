@@ -10,7 +10,7 @@ router
   .post(
     AuthMiddleware.isAuthenticated,
     AuthMiddleware.restictto(Role.Admin),
-    errorHandler(cartController.addtoCart)
+    errorHandler(cartController.addToCart)
   );
 
 export default router;

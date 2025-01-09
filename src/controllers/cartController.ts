@@ -1,38 +1,132 @@
+//
+import { Request, Response } from "express";
 import Cart from "../database/models/cartModel";
+import Product from "../database/models/productModel";
+import Category from "../database/models/categoryModel";
 import { UserRequestType } from "../middleware/authMiddleware";
-import { Response } from "express";
 
 class CartController {
-  async addtoCart(req: UserRequestType, res: Response): Promise<void> {
+  async addToCart(req: UserRequestType, res: Response): Promise<void> {
     const userId = req.user?.id;
     const { quantity, productId } = req.body;
-
     if (!quantity || !productId) {
-      res.status(400).json({ message: "please provide product and quantity" });
+      res.status(400).json({
+        message: "Please provide quantity,productId",
+      });
     }
-
+    // check if the the product alreay exists in the cart table or not
     let cartItem = await Cart.findOne({
       where: {
         productId,
         userId,
       },
     });
-
     if (cartItem) {
       cartItem.quantity += quantity;
       await cartItem.save();
     } else {
-      const cartItem = Cart.create({
+      // insert into Cart table
+      cartItem = await Cart.create({
+        quantity,
         userId,
         productId,
-        quantity,
       });
     }
 
-    res.status(200).json({
-      message: "cart added successfully",
-      data: cartItem,
+    const data = await Cart.findAll({
+      where: {
+        userId,
+      },
     });
+
+    res.status(200).json({
+      message: "Product added to cart",
+      data,
+    });
+  }
+
+  async getMyCarts(req: UserRequestType, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    const cartItems = await Cart.findAll({
+      where: {
+        userId,
+      },
+      include: [
+        {
+          model: Product,
+          include: [
+            {
+              model: Category,
+              attributes: ["id", "categoryName"],
+            },
+          ],
+        },
+      ],
+    });
+    if (cartItems.length === 0) {
+      res.status(404).json({
+        message: "No item in the cart",
+      });
+    } else {
+      res.status(200).json({
+        message: "Cart items fetched succesfully",
+        data: cartItems,
+      });
+    }
+  }
+
+  async deleteMyCartItem(req: UserRequestType, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    const { productId } = req.params;
+    // check whether above productId product exist or not
+    const product = await Product.findByPk(productId);
+    if (!product) {
+      res.status(404).json({
+        message: "No product with that id",
+      });
+      return;
+    }
+    // delete that productId from userCart
+    await Cart.destroy({
+      where: {
+        userId,
+        productId,
+      },
+    });
+    res.status(200).json({
+      message: "Product of cart deleted successfully",
+    });
+  }
+
+  async updateCartItem(req: UserRequestType, res: Response): Promise<void> {
+    const { productId } = req.params;
+    const userId = req.user?.id;
+    const { quantity } = req.body;
+    if (!quantity) {
+      res.status(400).json({
+        message: "Please provide quantity",
+      });
+      return;
+    }
+    const cartData = await Cart.findOne({
+      where: {
+        userId,
+        productId,
+      },
+    });
+
+    if (cartData) {
+      cartData.quantity = quantity;
+      await cartData?.save();
+      res.status(200).json({
+        message: "Product of cart updated successfully",
+        data: cartData,
+      });
+    } else {
+      res.status(404).json({
+        message: "No productId of that userId",
+      });
+    }
   }
 }
 

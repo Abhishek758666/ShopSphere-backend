@@ -26,6 +26,7 @@ class AuthController {
         res.status(400).json({
           message: "user already exist",
         });
+        return;
       }
 
       await User.create({
