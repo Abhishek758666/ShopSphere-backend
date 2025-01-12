@@ -14,34 +14,10 @@ class OrderDetail extends Model {
   declare id: string;
 
   @Column({
-    type: DataType.STRING,
+    type: DataType.INTEGER,
     allowNull: false,
   })
-  declare phonenumber: string;
-
-  @Column({
-    type: DataType.STRING,
-    allowNull: false,
-  })
-  declare shippingAddress: string;
-
-  @Column({
-    type: DataType.FLOAT,
-    allowNull: false,
-  })
-  declare totlaAmount: number;
-
-  @Column({
-    type: DataType.ENUM(
-      "pending",
-      "processing",
-      "shipped",
-      "delivered",
-      "cancelled"
-    ),
-    defaultValue: "pending",
-  })
-  declare orderStatus: number;
+  declare quantity: number;
 }
 
 export default OrderDetail;

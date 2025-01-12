@@ -15,21 +15,18 @@ class Order extends Model {
 
   @Column({
     type: DataType.STRING,
-    allowNull: false,
   })
-  declare phonenumber: string;
+  declare phoneNumber: string;
 
   @Column({
     type: DataType.STRING,
-    allowNull: false,
   })
   declare shippingAddress: string;
 
   @Column({
     type: DataType.FLOAT,
-    allowNull: false,
   })
-  declare totlaAmount: number;
+  declare totalAmount: number;
 
   @Column({
     type: DataType.ENUM(
