@@ -1,4 +1,5 @@
 import { Table, Column, Model, DataType } from "sequelize-typescript";
+import { OrderStatus } from "../../types/orderTypes";
 
 @Table({
   tableName: "orders",
@@ -29,13 +30,7 @@ class Order extends Model {
   declare totalAmount: number;
 
   @Column({
-    type: DataType.ENUM(
-      "pending",
-      "processing",
-      "shipped",
-      "delivered",
-      "cancelled"
-    ),
+    type: DataType.ENUM(...Object.values(OrderStatus)),
     defaultValue: "pending",
   })
   declare orderStatus: number;

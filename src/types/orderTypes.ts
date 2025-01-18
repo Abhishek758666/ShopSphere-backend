@@ -47,3 +47,11 @@ export enum TransactionStatus {
   Expired = "Expired",
   UserCanceled = "User canceled",
 }
+
+export enum OrderStatus {
+  Processing = "processing",
+  Pending = "pending",
+  Shipped = "shipped",
+  Delivered = "delivered",
+  Cancelled = "cancelled",
+}

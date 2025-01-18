@@ -17,5 +17,24 @@ router
     AuthMiddleware.isAuthenticated,
     errorHandler(OrderController.verifyTransaction)
   );
+router
+  .route("/customer")
+  .get(
+    AuthMiddleware.isAuthenticated,
+    errorHandler(OrderController.fetchMyorders)
+  );
+router
+  .route("/customer/order-details/:id")
+  .get(
+    AuthMiddleware.isAuthenticated,
+    errorHandler(OrderController.fetchOrderDetails)
+  );
+router
+  .route("/customer/cancel/:id")
+  .patch(
+    AuthMiddleware.isAuthenticated,
+    AuthMiddleware.restictto(Role.Customer),
+    errorHandler(OrderController.cancelOrder)
+  );
 
 export default router;

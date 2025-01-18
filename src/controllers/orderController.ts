@@ -4,6 +4,7 @@ import {
   khaltiLookupResponse,
   khaltiResponse,
   OrderData,
+  OrderStatus,
   PaymentMethod,
   TransactionStatus,
 } from "../types/orderTypes";
@@ -182,11 +183,38 @@ class OrderController {
     const userId = req.user?.id;
     const orderId = req.params.id;
 
-    const order = Order.findAll({
+    const order: any = Order.findAll({
       where: {
         userId,
         id: userId,
       },
+    });
+
+    if (
+      order.OrderStatus === OrderStatus.Delivered ||
+      order.OrderStatus === OrderStatus.Shipped ||
+      order.OrderStatus === OrderStatus.Processing ||
+      order.OrderStatus === OrderStatus.Cancelled
+    ) {
+      res.status(400).json({
+        message: "you cannot cancel order",
+      });
+      return;
+    }
+
+    await Order.update(
+      {
+        OrderStatus: OrderStatus.Cancelled,
+      },
+      {
+        where: {
+          id: orderId,
+        },
+      }
+    );
+
+    res.status(200).json({
+      message: "order cancelled successfully",
     });
   }
 }
