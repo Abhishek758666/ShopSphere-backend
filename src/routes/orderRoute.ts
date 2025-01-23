@@ -37,4 +37,26 @@ router
     errorHandler(OrderController.cancelOrder)
   );
 
+// admin
+router
+  .route("/admin/order/:id")
+  .patch(
+    AuthMiddleware.isAuthenticated,
+    AuthMiddleware.restictto(Role.Admin),
+    errorHandler(OrderController.changeOrderStatus)
+  );
+router
+  .route("/admin/payment/:id")
+  .patch(
+    AuthMiddleware.isAuthenticated,
+    AuthMiddleware.restictto(Role.Admin),
+    errorHandler(OrderController.changeOrderStatus)
+  );
+router
+  .route("/admin/order/:id")
+  .delete(
+    AuthMiddleware.isAuthenticated,
+    AuthMiddleware.restictto(Role.Admin),
+    errorHandler(OrderController.changeOrderStatus)
+  );
 export default router;

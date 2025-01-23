@@ -1,11 +1,12 @@
 import { UserRequestType } from "../middleware/authMiddleware";
-import { Response } from "express";
+import { Response, Request } from "express";
 import {
   khaltiLookupResponse,
   khaltiResponse,
   OrderData,
   OrderStatus,
   PaymentMethod,
+  PaymentStatus,
   TransactionStatus,
 } from "../types/orderTypes";
 import Order from "../database/models/orderModel";
@@ -14,6 +15,10 @@ import OrderDetail from "../database/models/orderDetailModel";
 import axios from "axios";
 import { envConfig } from "../config/envConfig";
 import Product from "../database/models/productModel";
+
+class ExtendedOrder extends Order {
+  declare paymentId: string | null;
+}
 
 class OrderController {
   async createOrder(req: UserRequestType, res: Response): Promise<void> {
@@ -153,7 +158,7 @@ class OrderController {
     }
   }
 
-  async fetchOrderDetails(req: UserRequestType, res: Response) {
+  async fetchOrderDetails(req: UserRequestType, res: Response): Promise<void> {
     const orderId = req.params.id;
 
     const order = await Order.findAll({
@@ -179,7 +184,7 @@ class OrderController {
     }
   }
 
-  async cancelOrder(req: UserRequestType, res: Response) {
+  async cancelOrder(req: UserRequestType, res: Response): Promise<void> {
     const userId = req.user?.id;
     const orderId = req.params.id;
 
@@ -216,6 +221,73 @@ class OrderController {
     res.status(200).json({
       message: "order cancelled successfully",
     });
+  }
+
+  // admin side
+  async changeOrderStatus(req: Request, res: Response): Promise<void> {
+    const orderId = req.params.id;
+    const orderStatus: OrderStatus = req.body.OrderStatus;
+    await Order.update(
+      { orderStatus: orderStatus },
+      {
+        where: {
+          id: orderId,
+        },
+      }
+    );
+    res.status(200).json({
+      message: "Order status updated successfully",
+    });
+  }
+  async changePaymentStatus(req: Request, res: Response): Promise<void> {
+    const orderId = req.params.id;
+    const paymentStatus: PaymentStatus = req.body.paymentStatus;
+    const order = await Order.findByPk(orderId);
+    const extendedOrder: ExtendedOrder | null = order as ExtendedOrder | null;
+
+    await Payment.update(
+      {
+        paymentStatus: paymentStatus,
+      },
+      {
+        where: {
+          id: extendedOrder?.paymentId,
+        },
+      }
+    );
+    res.status(200).json({
+      message: `payment status of orderId ${orderId} updated to ${paymentStatus}`,
+    });
+  }
+  async deleteOrder(req: Request, res: Response): Promise<void> {
+    const orderId = req.params.id;
+    const order: any = await Order.findByPk(orderId);
+
+    if (order) {
+      await Order.destroy({
+        where: {
+          id: orderId,
+        },
+      });
+      await OrderDetail.destroy({
+        where: {
+          orderId: orderId,
+        },
+      });
+      await Payment.destroy({
+        where: {
+          id: order.PaymentId,
+        },
+      });
+
+      res.status(200).json({
+        message: "order deleted successfully",
+      });
+    } else {
+      res.status(400).json({
+        message: "order not found",
+      });
+    }
   }
 }
 
