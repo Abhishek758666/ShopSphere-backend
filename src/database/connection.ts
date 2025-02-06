@@ -7,6 +7,7 @@ import Cart from "./models/cartModel";
 import Order from "./models/orderModel";
 import OrderDetail from "./models/orderDetailModel";
 import Payment from "./models/paymentModel";
+import Banner from "./models/bannerModel";
 
 // initializing sequelize
 const sequelize = new Sequelize({
@@ -62,5 +63,9 @@ Order.belongsTo(Payment, { foreignKey: "paymentId" });
 //order-user relation
 User.hasMany(Order, { foreignKey: "userId" });
 Order.belongsTo(User, { foreignKey: "userId" });
+
+// user-banner relation
+User.hasMany(Banner, { foreignKey: "userId" });
+Banner.belongsTo(User, { foreignKey: "userId" });
 
 export default sequelize;
